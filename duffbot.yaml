@@ -1,0 +1,161 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: duffbot-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: duffbot-backend
+  template:
+    metadata:
+      labels:
+        app: duffbot-backend
+    spec:
+      containers:
+      - name: duffbot-backend
+        image: jmrobles/duffbot-backend:latest
+        ports:
+        - containerPort: 8000
+          name: backend
+        command: ["/bin/sh"]
+        args: ["-c", "uvicorn backend.main:app --host 0.0.0.0 --port 8000"]
+        envFrom:
+        - secretRef:
+            name: duffbot-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: duffbot-gradio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: duffbot-gradio
+  template:
+    metadata:
+      labels:
+        app: duffbot-gradio
+    spec:
+      containers:
+      - name: duffbot-gradio
+        image: jmrobles/duffbot-backend:latest
+        requests:
+          cpu: 500
+          memory: 256M
+        limits:
+          cpu: 1000
+          memory: 512M
+        ports:
+        - containerPort: 8001
+          name: gradio
+        command: ["/bin/sh"]
+        args: ["-c", "python frontend/gradio_app.py"]
+        envFrom:
+        - secretRef:
+            name: duffbot-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: duffbot-scoreboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: duffbot-scoreboard
+  template:
+    metadata:
+      labels:
+        app: duffbot-scoreboard
+    spec:
+      containers:
+      - name: duffbot-scoreboard
+        image: jmrobles/duffbot-scoreboard-fe:latest
+        requests:
+          cpu: 500
+          memory: 256M
+        limits:
+          cpu: 1000
+          memory: 512M
+        ports:
+        - containerPort: 80
+          name: scoreboard
+        envFrom:
+        - secretRef:
+            name: duffbot-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: duffbot-backend
+spec:
+  selector:
+    app: duffbot-backend
+  ports:
+  - port: 8000
+    targetPort: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: duffbot-gradio
+spec:
+  selector:
+    app: duffbot-gradio
+  ports:
+  - port: 8001
+    targetPort: gradio
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: duffbot-scoreboard
+spec:
+  selector:
+    app: duffbot-scoreboard
+  ports:
+  - port: 80
+    targetPort: scoreboard
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: duffbot-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-hash: "ip"    
+spec:
+  tls:
+  - hosts:
+    - duffbot.aibirras.org
+    secretName: duffbot-tls
+  rules:
+  - host: duffbot.aibirras.org
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: duffbot-backend
+            port: 
+              number: 8000
+      - path: /scoreboard
+        pathType: Prefix
+        backend:
+          service:
+            name: duffbot-scoreboard
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: duffbot-gradio
+            port: 
+              number: 8001

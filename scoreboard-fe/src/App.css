@@ -1,0 +1,44 @@
+
+#root {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+@keyframes updateAnimation {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.MuiCard-root {
+  transition: all 0.3s ease-in-out;
+}
+
+.MuiCard-root.updated {
+  animation: updateAnimation 0.5s ease-in-out;
+}
+
+.logo {
+  max-width: 200px;
+  
+}
+
+.claim {
+  color: #444;
+}
+
+.claim span {
+  color: black;
+  font-weight: bold;;
+}
