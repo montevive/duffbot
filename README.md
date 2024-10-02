@@ -65,6 +65,7 @@ Duffbot is an AI agent that collects user preferences about AI tools used in dai
 git clone https://github.com/montevive/duffbot.git
 cd duffbot
 pip install -r requirements.txt
+```
 
 ## Usage
 
@@ -78,15 +79,29 @@ uvicorn backend.main:app --reload
 
 ```
 python frontend/gradio_app.py
-``
+```
 
 3. Open a web browser and navigate to the URL provided by Gradio (typically http://localhost:8001)
 4. Submit your AI tool preferences using the Gradio interface
 5. View the real-time scoreboard to see the most popular tools
 
-# API Documentation
+## API Documentation
 
 After starting the FastAPI server, you can view the API documentation at http://localhost:8000/docs.
+
+## Project Origin
+
+This project was developed by the Montevive team for an activity during the third AiBirras event. AiBirras is a community-driven initiative that brings together AI enthusiasts and professionals to share knowledge, collaborate on projects, and explore new ideas in the field of artificial intelligence.
+
+<p align="center">
+  <a href="https://aibirras.org" target="_blank">
+    <img src="resources/aibirras.png" alt="AiBirras Logo" width="100"/>
+  </a>
+  <a href="https://montevive.ai" target="_blank">
+    <img src="resources/montevive.png" alt="Montevive Logo" width="100"/>
+  </a>
+</p>
+Montevive is proud to contribute to the AI community through projects like Duffbot, fostering innovation and knowledge sharing in the spirit of AiBirras.
 
 
 # Contributing
